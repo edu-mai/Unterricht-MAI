@@ -1,12 +1,15 @@
 # Lernmaterialien für den Unterricht
 
-Statische Website für GitHub Pages. `index.html` liegt im Hauptverzeichnis; CSS unter `css/style.css`, JavaScript unter `js/main.js`.
+Statische Website für GitHub Pages. `index.html` muss im Hauptverzeichnis des Repositorys liegen. Pages-Einstellung: `Deploy from a branch`, Branch `main`, Ordner `/(root)`.
 
-## Veröffentlichen
-Dateien in das geklonte GitHub-Repository kopieren, committen, pushen. Unter GitHub → Settings → Pages: Deploy from a branch → `main` → `/ (root)`.
+## Inhalt
+- `mathematik/12-13/index.html`: gegliederte Übersicht mit linker Sprungnavigation (Analysis, Analytische Geometrie, Stochastik).
+- `mathematik/12-13/applets/grafische-rekonstruktion/index.html`: unverändertes HTML aus `Applet_IServ_Upload(1).zip`.
+- `mathematik/12-13/applets/stammfunktion-konstanter-faktor/index.html`: unverändertes HTML aus `Faktorregel_Netlify_Upload_LaTeX(1).zip`.
+- `css/style.css`: gemeinsames Design für die Website.
+- `js/main.js`: bestehende JS-Interaktionen.
 
-## Applet hinzufügen
-`mathematik/12-13/applets/mein-erstes-applet/` enthält zunächst eine Platzhalter-`index.html`. Diese durch dein echtes Applet (HTML sowie benötigte CSS-/JS-/Asset-Dateien) ersetzen. Liegt es als Vite/React-Projekt vor, zuerst einen Produktions-Build mit passendem `base`-Pfad erzeugen und den Inhalt des Build-Ordners veröffentlichen. Eine bestehende Netlify-Adresse allein kopiert den Applet-Quellcode nicht auf GitHub Pages.
+Beide Applets nutzen die externe GeoGebra-Bibliothek (`www.geogebra.org/apps/deployggb.js`); das zweite lädt außerdem MathJax über jsDelivr. Für ihre vollständige Funktion ist deshalb Internetzugang notwendig. Die HTML-Dateien selbst liegen direkt bei GitHub Pages, nicht bei Netlify.
 
-## Lokaler Test
-`index.html` im Browser öffnen. Für Applets mit `fetch`, ES-Modulen o. Ä. besser mit lokalem Entwicklungsserver testen (z. B. `python3 -m http.server 8000` im Projektverzeichnis).
+## Einspielen
+Kopiere **den Inhalt dieses Ordners** (nicht den übergeordneten Ordner) in die Wurzel deines lokalen GitHub-Repositories. Anschließend in VS Code: Stage → Commit → Push. Die bisherige Platzhalter-Appletseite wurde entfernt. Prüfe die öffentlichen Dateien vor dem Push auf persönliche Daten.
