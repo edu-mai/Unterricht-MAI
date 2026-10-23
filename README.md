@@ -13,3 +13,7 @@ Beide Applets nutzen die externe GeoGebra-Bibliothek (`www.geogebra.org/apps/dep
 
 ## Einspielen
 Kopiere **den Inhalt dieses Ordners** (nicht den übergeordneten Ordner) in die Wurzel deines lokalen GitHub-Repositories. Anschließend in VS Code: Stage → Commit → Push. Die bisherige Platzhalter-Appletseite wurde entfernt. Prüfe die öffentlichen Dateien vor dem Push auf persönliche Daten.
+
+## Designaktualisierung
+Die Jahrgangsseite hat eine linke CSS-Grid-Sprungnavigation und farbige Abschnittsbalken.
+Ein `?v=3` am CSS-Link der Jahrgangsseite hilft gegen einen alten Browser-Cache.

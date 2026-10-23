@@ -23,3 +23,29 @@ html{scroll-behavior:smooth}
 .applet-list a:hover{text-decoration:underline}
 @media(max-width:760px){.year-layout{grid-template-columns:1fr;gap:18px}.section-sidebar{position:static}.section-sidebar nav{display:flex;flex-wrap:wrap;gap:6px}.topic-section{padding:20px}.topic-group{padding-left:12px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* Version 3: eigenstaendige Navigation und farbige Themenbanner */
+.year-layout { display:grid; grid-template-columns: 230px minmax(0,1fr); gap:28px; align-items:start; }
+.section-sidebar { display:block; position:sticky; top:20px; padding:20px; background:#fff; border:1px solid #dce4ed; border-radius:14px; box-shadow:0 5px 20px #173c5910; }
+.section-sidebar .sidebar-title { margin:0 0 14px; font-size:1rem; font-weight:800; }
+.section-sidebar nav { display:flex; flex-direction:column; gap:8px; }
+.section-sidebar nav a { display:block; padding:11px 13px; border-radius:8px; text-decoration:none; color:#243247; background:#f3f6fa; border-left:4px solid transparent; font-weight:650; line-height:1.35; }
+.section-sidebar nav a[href="#analysis"] { border-left-color:#bc4552; }
+.section-sidebar nav a[href="#analytische-geometrie"] { border-left-color:#3276b7; }
+.section-sidebar nav a[href="#stochastik"] { border-left-color:#39865d; }
+.section-sidebar nav a:hover, .section-sidebar nav a:focus-visible { background:#e4edf5; color:#173c59; }
+.topic-section { overflow:hidden; padding:0 0 12px; scroll-margin-top:22px; }
+.topic-section h3 { margin:0 0 23px; padding:18px 25px; border:0; color:#fff; font-size:1.48rem; line-height:1.3; }
+.topic-analysis h3 { background:#aa3445; }
+.topic-geometrie h3 { background:#276498; }
+.topic-stochastik h3 { background:#2f7751; }
+.topic-section:target { box-shadow:0 0 0 3px #ffbf47; border-color:transparent; }
+.topic-section .topic-group { margin:0 25px 18px; padding:2px 0 10px 15px; }
+.topic-section .topic-group:last-child { margin-bottom:5px; }
+@media (max-width:760px) {
+ .year-layout { grid-template-columns:minmax(0,1fr); gap:20px; }
+ .section-sidebar { position:static; }
+ .section-sidebar nav { flex-direction:column; }
+ .topic-section h3 { padding:15px 18px; }
+ .topic-section .topic-group { margin-left:17px; margin-right:17px; }
+}
