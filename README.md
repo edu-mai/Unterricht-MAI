@@ -1,19 +1,12 @@
-# Lernmaterialien für den Unterricht
+# MAI Lernraum – Website
 
-Statische Website für GitHub Pages. `index.html` muss im Hauptverzeichnis des Repositorys liegen. Pages-Einstellung: `Deploy from a branch`, Branch `main`, Ordner `/(root)`.
+Alle Dateien (nicht den übergeordneten Ordner) in das GitHub-Pages-Repository kopieren. `index.html` bleibt im Repository-Hauptverzeichnis. Anschließend Stage → Commit → Push.
 
-## Inhalt
-- `mathematik/12-13/index.html`: gegliederte Übersicht mit linker Sprungnavigation (Analysis, Analytische Geometrie, Stochastik).
-- `mathematik/12-13/applets/grafische-rekonstruktion/index.html`: unverändertes HTML aus `Applet_IServ_Upload(1).zip`.
-- `mathematik/12-13/applets/stammfunktion-konstanter-faktor/index.html`: unverändertes HTML aus `Faktorregel_Netlify_Upload_LaTeX(1).zip`.
-- `css/style.css`: gemeinsames Design für die Website.
-- `js/main.js`: bestehende JS-Interaktionen.
+## Wichtig vor Veröffentlichung
+- Das Impressum enthält auf ausdrücklichen Wunsch **keine Anschrift** und ist bei bestehender Pflicht nach § 5 DDG unvollständig. Rechtlich prüfen und ggf. ladungsfähige Anschrift ergänzen.
+- Die Datenschutzerklärung ist ein auf die vorliegenden technischen Dateien bezogener Entwurf, keine Garantie rechtlicher Vollständigkeit. Insbesondere externe GeoGebra-/jsDelivr-Verarbeitung und mögliche Einwilligungen prüfen.
+- Alle Übersichtsseiten besitzen Hauptinhalt-Sprunglinks, semantische Navigation und Footer. Applets haben ergänzte Zurück-/Rechtslinks. Die GeoGebra-Interaktionen müssen separat mit Tastatur, Zoom und Screenreader praktisch getestet werden; vollständige Barrierefreiheit ist nicht garantiert.
+- `index.html` der beiden Applets lädt GeoGebra extern, das Faktorregel-Applet zusätzlich MathJax von jsDelivr.
 
-Beide Applets nutzen die externe GeoGebra-Bibliothek (`www.geogebra.org/apps/deployggb.js`); das zweite lädt außerdem MathJax über jsDelivr. Für ihre vollständige Funktion ist deshalb Internetzugang notwendig. Die HTML-Dateien selbst liegen direkt bei GitHub Pages, nicht bei Netlify.
-
-## Einspielen
-Kopiere **den Inhalt dieses Ordners** (nicht den übergeordneten Ordner) in die Wurzel deines lokalen GitHub-Repositories. Anschließend in VS Code: Stage → Commit → Push. Die bisherige Platzhalter-Appletseite wurde entfernt. Prüfe die öffentlichen Dateien vor dem Push auf persönliche Daten.
-
-## Designaktualisierung
-Die Jahrgangsseite hat eine linke CSS-Grid-Sprungnavigation und farbige Abschnittsbalken.
-Ein `?v=3` am CSS-Link der Jahrgangsseite hilft gegen einen alten Browser-Cache.
+## Dateien
+`impressum.html`, `datenschutz.html`, `css/style.css`, Übersichtseiten, beide Applets.
