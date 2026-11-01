@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f5f7fb" />
+  <title>Obersumme und Untersumme</title>
+  <style>
+    :root { --ink:#19263c; --muted:#63738a; --border:#dce4ef; --surface:#fff; --bg:#f3f6fb; --upper:#d87934; --lower:#287db5; --accent:#315b91; }
+    * { box-sizing:border-box; }
+    html,body { margin:0; min-height:100%; }
+    body { font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:var(--ink); background:var(--bg); }
+    .shell { max-width:1330px; padding:clamp(14px,2.8vw,34px); margin:auto; }
+    h1 { margin:0; font-size:clamp(1.55rem,2.7vw,2.3rem); letter-spacing:-.035em; }
+    .layout { display:grid; grid-template-columns:minmax(0,1.65fr) minmax(295px,1fr); gap:20px; align-items:start; }
+    .panel { background:var(--surface); border:1px solid var(--border); border-radius:17px; box-shadow:0 5px 24px rgba(28,56,91,.045); overflow:hidden; }
+    .panel-header { padding:18px 20px 14px; border-bottom:1px solid #edf1f6; display:flex; flex-wrap:wrap; align-items:center; gap:7px 15px; justify-content:space-between; }
+    .panel-header h2 { font-size:1.07rem; margin:0; }
+    .plot-area { position:relative; height:clamp(390px,50vw,630px); min-height:390px; background:#fff; overflow:hidden; }
+    #geogebra { width:100%; height:100%; }
+    /* Vollständig passive Grafik: keine Gesten, kein Zoom, kein Verschieben und keine Kontextmenüs. */
+    .plot-shield { position:absolute; inset:0; z-index:5; touch-action:none; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; background:transparent; }
+    .plot-loading { position:absolute; inset:0; z-index:4; display:grid; place-items:center; color:var(--muted); text-align:center; padding:30px; background:#fff; font-size:.95rem; }
+    .plot-loading.hidden { display:none; }
+    .legend { display:flex; flex-wrap:wrap; gap:12px 20px; align-items:center; padding:14px 20px; border-top:1px solid #edf1f6; color:#3f526d; font-size:.85rem; }
+    .legend-item { display:flex; gap:8px; align-items:center; }
+    .swatch { width:15px; height:15px; border-radius:4px; display:inline-block; }
+    .swatch.upper { background:rgba(216,121,52,.28); border:2px solid var(--upper); }
+    .swatch.lower { background:rgba(40,125,181,.4); border:2px solid var(--lower); }
+    .swatch.function { width:24px; height:0; border-top:3px solid #bc3151; border-radius:0; }
+    .controls-content { padding:20px; }
+    .reset-row { display:flex; justify-content:flex-end; margin-bottom:13px; }
+    button { cursor:pointer; font:inherit; }
+    .reset { border:1.5px solid #53677e; border-radius:10px; padding:9px 16px; font-weight:700; color:#253d5b; background:#f0f4f8; }
+    .reset:hover { background:#e4edf6; }
+    .section-title { font-weight:750; font-size:.88rem; color:#283f5e; letter-spacing:.01em; margin-bottom:12px; }
+    .control-block { background:#f8fafd; border:1px solid #e5ebf3; border-radius:13px; padding:15px; margin-bottom:18px; }
+    .range-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; font-weight:650; }
+    .count { color:var(--accent); font-size:1.3rem; font-variant-numeric:tabular-nums; font-weight:800; }
+    input[type="range"] { width:100%; accent-color:var(--accent); touch-action:pan-x; cursor:pointer; min-height:32px; }
+    .bounds { display:flex; justify-content:space-between; color:var(--muted); font-size:.75rem; margin-top:1px; }
+    .input-row { display:flex; align-items:center; gap:10px; margin-top:16px; }
+    .input-row label { color:#415573; font-size:.87rem; flex:1; }
+    .number-input { width:102px; padding:10px 11px; border-radius:9px; border:1.5px solid #bac8d9; background:#fff; font-size:1rem; font-variant-numeric:tabular-nums; font-weight:650; color:var(--ink); }
+    .number-input:focus-visible, select:focus-visible, input:focus-visible, button:focus-visible { outline:3px solid #94b9e8; outline-offset:2px; }
+    .error { color:#b22e33; font-size:.78rem; margin:9px 0 0; min-height:1em; }
+    .field-label { display:block; font-size:.85rem; color:#415573; margin:0 0 8px; }
+    select { width:100%; background:#fff; padding:10px 12px; font:inherit; color:var(--ink); border:1px solid #c6d1e0; border-radius:9px; }
+    .math-card { padding:14px 15px; border:1px solid var(--border); border-radius:12px; margin-top:12px; overflow-x:auto; }
+    .math-card.upper { border-left:4px solid var(--upper); }
+    .math-card.lower { border-left:4px solid var(--lower); }
+    .math-name { font-size:.82rem; font-weight:750; margin-bottom:8px; }
+    .math-card.upper .math-name { color:#a6531f; }
+    .math-card.lower .math-name { color:#226c9a; }
+    .formula { font-size:1.01rem; min-height:27px; line-height:1.9; white-space:nowrap; }
+    @media(max-width:860px) { .layout { grid-template-columns:1fr; } .plot-area { height:clamp(340px,65vw,530px); min-height:340px; } }
+    @media(max-width:430px) { .shell { padding:12px; } .panel-header,.controls-content { padding:15px; } .plot-area { height:365px; } .legend { padding:12px 15px; } }
+  </style>
+  <script>
+    window.MathJax = { tex: { inlineMath:[['\\(','\\)']], displayMath:[['\\[','\\]']] }, options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}, startup:{typeset:false} };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  <script defer src="https://www.geogebra.org/apps/deployggb.js"></script>
+</head>
+<body>
+<main class="shell">
+  <h1>Obersumme und Untersumme</h1>
+  <div class="layout">
+    <section class="panel" aria-labelledby="diagram-title">
+      <div class="panel-header"><h2 id="diagram-title">Graph von f mit f(x) = x²</h2></div>
+      <div class="plot-area">
+        <div id="geogebra" aria-label="GeoGebra-Koordinatensystem mit der Funktion x Quadrat und den Ober- und Untersummen"></div>
+        <div id="plot-loading" class="plot-loading" role="status">GeoGebra-Grafik wird geladen …</div>
+        <div class="plot-shield" aria-hidden="true"></div>
+      </div>
+      <div class="legend" aria-label="Legende">
+        <span class="legend-item"><span class="swatch function"></span> <span>f(x) = x²</span></span>
+        <span class="legend-item"><span class="swatch upper"></span> <span>Obersumme</span></span>
+        <span class="legend-item"><span class="swatch lower"></span> <span>Untersumme</span></span>
+      </div>
+    </section>
+    <aside class="panel" aria-labelledby="controls-title">
+      <div class="panel-header"><h2 id="controls-title">Steuerungsbereich</h2></div>
+      <div class="controls-content">
+        <div class="reset-row"><button class="reset" type="button" id="reset">Zurücksetzen</button></div>
+        <div class="control-block">
+          <div class="range-heading"><label for="n-slider">Anzahl der Teilintervalle <em>n</em></label><output class="count" id="n-value" for="n-slider">4</output></div>
+          <input type="range" min="0" max="200" step="1" value="4" id="n-slider" aria-label="Anzahl der äquidistanten Teilintervalle" />
+          <div class="bounds"><span>0</span><span>200</span></div>
+          <div class="input-row"><label for="n-input">Exakte Eingabe für <em>n</em> (0 bis 200)</label><input class="number-input" type="number" min="0" max="200" step="1" inputmode="numeric" value="4" id="n-input" /></div>
+          <p class="error" id="error" aria-live="polite"></p>
+          <label for="mode" class="field-label">Rechtecke im Diagramm anzeigen</label>
+          <select id="mode"><option value="both">Ober- und Untersumme</option><option value="upper">Nur Obersumme</option><option value="lower">Nur Untersumme</option><option value="none">Keine Rechtecke</option></select>
+        </div>
+        <div class="section-title">Berechnung der Summen</div>
+        <div class="math-card upper"><div class="math-name">Obersumme Oₙ</div><div class="formula" id="upper-formula">\(O_4 \approx 3{,}75\)</div></div>
+        <div class="math-card lower"><div class="math-name">Untersumme Uₙ</div><div class="formula" id="lower-formula">\(U_4 \approx 1{,}75\)</div></div>
+      </div>
+    </aside>
+  </div>
+</main>
+<script>
+(function () {
+  'use strict';
+  const slider = document.getElementById('n-slider');
+  const input = document.getElementById('n-input');
+  const output = document.getElementById('n-value');
+  const modeInput = document.getElementById('mode');
+  const error = document.getElementById('error');
+  const loading = document.getElementById('plot-loading');
+  let n = 4;
+  let api = null;
+  let mathSerial = 0;
+
+  const de = (value, digits=6) => value.toLocaleString('de-DE',{maximumFractionDigits:digits, minimumFractionDigits:0});
+  const texNum = value => de(value).replace(/,/g, '{,}');
+  const math = (id, latex) => {document.getElementById(id).textContent = '\\(' + latex + '\\)';};
+
+  function typeset() {
+    const current = ++mathSerial;
+    const nodes = ['upper-formula','lower-formula'].map(id=>document.getElementById(id));
+    if (!window.MathJax || !MathJax.typesetPromise) return;
+    MathJax.typesetClear?.(nodes);
+    MathJax.typesetPromise(nodes).catch(()=>{}).then(()=>{if(current !== mathSerial) return;});
+  }
+
+  function updateTexts() {
+    output.textContent = String(n);
+    slider.value = String(n);
+    input.value = String(n);
+    if (n === 0) {
+      math('upper-formula', String.raw`O_0 = 0`);
+      math('lower-formula', String.raw`U_0 = 0`);
+    } else {
+      // Exakte Summen für f(x)=x² auf [0,2]:
+      // O_n = 8/3 + 4/n + 4/(3n²), U_n = 8/3 - 4/n + 4/(3n²).
+      const upper = 8/3 + 4/n + 4/(3*n*n);
+      const lowerRaw = 8/3 - 4/n + 4/(3*n*n);
+      const lower = Math.abs(lowerRaw) < 1e-12 ? 0 : lowerRaw;
+      math('upper-formula', String.raw`O_{${n}}\approx ${texNum(upper)}`);
+      math('lower-formula', String.raw`U_{${n}}\approx ${texNum(lower)}`);
+    }
+    typeset();
+  }
+
+  function updateGraph() {
+    if (!api) return;
+    try {
+      // GeoGebra erlaubt für Rechtecksummen keine Zerlegung mit n=0.
+      api.setValue('rectCount',Math.max(1,n));
+      const show = n > 0;
+      const mode = modeInput.value;
+      api.setVisible('Ober',show && (mode==='upper'||mode==='both'));
+      api.setVisible('Unter',show && (mode==='lower'||mode==='both'));
+    } catch(e) { console.warn('GeoGebra konnte nicht aktualisiert werden.',e); }
+  }
+
+  function setN(value) {
+    n = value;
+    error.textContent='';
+    updateTexts();
+    updateGraph();
+  }
+  slider.addEventListener('input',() => setN(Number(slider.value)));
+  input.addEventListener('change',()=>{
+    const raw = input.value.trim();
+    const value = Number(raw);
+    if(raw==='' || !Number.isInteger(value) || value<0 || value>200) {
+      error.textContent='Bitte eine ganze Zahl von 0 bis 200 eingeben.';
+      input.value=String(n);
+      return;
+    }
+    setN(value);
+  });
+  modeInput.addEventListener('change',updateGraph);
+  document.getElementById('reset').addEventListener('click',()=>{modeInput.value='both';setN(4);});
+
+  function initGeoGebra() {
+    if(typeof GGBApplet !== 'function') {
+      loading.textContent='GeoGebra konnte nicht geladen werden. Bitte die Internetverbindung prüfen und die Seite neu laden.';
+      return;
+    }
+    const plot = document.querySelector('.plot-area');
+    const width = Math.max(300,Math.floor(plot.clientWidth));
+    const height = Math.max(340,Math.floor(plot.clientHeight));
+    const params = {
+      id:'sumsGGB', appName:'classic', width, height,
+      showToolBar:false, showMenuBar:false, showAlgebraInput:false,
+      showResetIcon:false, showZoomButtons:false, showFullscreenButton:false,
+      enableShiftDragZoom:false, enableRightClick:false, enableLabelDrags:false,
+      enableFileFeatures:false, enableCAS:false, useBrowserForJS:false,
+      showAnimationButton:false, showLogging:false, errorDialogsActive:false,
+      language:'de', perspective:'G',
+      appletOnLoad:function(ggb) {
+        api=ggb;
+        try {
+          api.setErrorDialogsActive(false);
+          api.setCoordSystem(-0.35,3.05,-0.5,5.15);
+          api.setAxesVisible(true,true);
+          api.setGridVisible(true);
+          api.evalCommand('rectCount = 4');
+          api.setVisible('rectCount',false);
+          api.evalCommand('f(x) = x^2');
+          api.setColor('f',188,49,81);
+          api.setLineThickness('f',5);
+          api.setLabelVisible('f',true);
+          api.setLabelStyle('f',0);
+          api.evalCommand('Ober = UpperSum(f, 0, 2, rectCount)');
+          api.setColor('Ober',216,121,52);
+          api.setFilling('Ober',0.18);
+          api.setLineThickness('Ober',1);
+          api.setLabelVisible('Ober',false);
+          api.evalCommand('Unter = LowerSum(f, 0, 2, rectCount)');
+          api.setColor('Unter',40,125,181);
+          api.setFilling('Unter',0.36);
+          api.setLineThickness('Unter',1);
+          api.setLabelVisible('Unter',false);
+          // Intervallgrenzen visuell markieren.
+          api.evalCommand('a = (0, 0)'); api.evalCommand('b = (2, 0)');
+          api.setVisible('a',false); api.setVisible('b',false);
+          updateGraph();
+          loading.classList.add('hidden');
+        } catch(e) {
+          console.warn('GeoGebra-Initialisierung:',e);
+          loading.textContent='Die Grafik konnte nicht vollständig initialisiert werden. Bitte Seite neu laden.';
+        }
+      }
+    };
+    try { new GGBApplet(params,true).inject('geogebra'); }
+    catch(e) { loading.textContent='Die GeoGebra-Grafik konnte nicht geladen werden.'; }
+  }
+
+  updateTexts();
+  window.addEventListener('load', () => {
+    initGeoGebra();
+    if (window.MathJax?.startup?.promise) {
+      window.MathJax.startup.promise.then(typeset).catch(() => {});
+    } else {
+      typeset();
+    }
+  });
+  // Auf externen iPad-Tastaturen ist auch Enter eine gültige Eingabebestätigung.
+  input.addEventListener('keydown',e=>{if(e.key==='Enter')input.blur();});
+})();
+</script>
+</body>
+</html>
